@@ -21,12 +21,12 @@ namespace ToDo.BackEnd
         public void OnActionExecuted(ActionExecutedContext context)
         {
             // Before actions
-            _logger.LogInformation("### Executando ANTES dos métodos de ação ###");
+            _logger.LogInformation("### Executando DEPOIS dos métodos de ação ###");
         }
 
         public void OnActionExecuting(ActionExecutingContext context)
         {
-            _logger.LogInformation("### Executando DEPOIS dos métods de ação ###");
+            _logger.LogInformation("### Executando ANTES dos métods de ação ###");
         }
         #endregion
     }

@@ -203,6 +203,7 @@ namespace ToDo.BackEnd
 
         #region Actions
         [HttpGet]
+        [ServiceFilter(typeof(LoggingFilter))]
         public async Task<ActionResult<IEnumerable<ToDo>>> Get()
         {
             List<ToDo> toDos = await _context.ToDos.AsNoTracking().ToListAsync();
