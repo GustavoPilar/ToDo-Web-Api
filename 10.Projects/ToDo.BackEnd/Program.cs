@@ -20,6 +20,11 @@ builder.Services.AddDbContext<ToDoContext>(options => options.UseMySql(connectio
 
 builder.Services.AddScoped<LoggingFilter>();
 
+builder.Logging.AddProvider(new CustomLoggerProvider(new CustomLoggerProviderConfiguration()
+{
+    LogLevel = LogLevel.Information
+}));
+
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.
