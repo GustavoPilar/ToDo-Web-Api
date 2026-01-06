@@ -18,14 +18,14 @@ namespace ToDo.BackEnd
         public CategoryController(ICategoryRepository repository)
         {
             _repository = repository;
-        }
+        } 
         #endregion
 
         #region Actions
         [HttpGet]
         public ActionResult<IEnumerable<Category>> Get()
         {
-            var categories = _repository.GetCategories();
+            var categories = _repository.GetCategories().ToList();
             return Ok(categories);
         }
 

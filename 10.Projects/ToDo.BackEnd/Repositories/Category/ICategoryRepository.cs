@@ -2,7 +2,7 @@
 {
     public interface ICategoryRepository
     {
-        IEnumerable<Category> GetCategories();
+        IQueryable<Category> GetCategories();
         Category GetCategoryById(int id);
         Category Create(Category category);
         Category Update(Category category);

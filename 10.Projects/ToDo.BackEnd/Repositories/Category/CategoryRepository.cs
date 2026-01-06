@@ -17,9 +17,9 @@ namespace ToDo.BackEnd
         #endregion
 
         #region Members
-        public IEnumerable<Category> GetCategories()
+        public IQueryable<Category> GetCategories()
         {
-            return _context.Categories.AsNoTracking().ToList();
+            return _context.Categories.AsNoTracking();
         }
 
         public Category GetCategoryById(int id)
