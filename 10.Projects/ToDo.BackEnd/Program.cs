@@ -18,6 +18,8 @@ builder.Services.AddSwaggerGen();
 string connectionString = builder.Configuration.GetConnectionString("DefaultConnection");
 builder.Services.AddDbContext<ToDoContext>(options => options.UseMySql(connectionString, ServerVersion.AutoDetect(connectionString)));
 
+builder.Services.AddScoped<LoggingFilter>();
+
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.
