@@ -86,7 +86,7 @@ namespace ToDo.BackEnd
                 return BadRequest("Id inválido...");
             }
 
-            _context.Remove(category);
+            _context.Categories.Remove(category);
             await _context.SaveChangesAsync();
 
             return Ok("Categoria deletada!");
@@ -146,7 +146,7 @@ namespace ToDo.BackEnd
                 return BadRequest("Severidade não pode ser nula...");
             }
 
-            await _context.AddAsync(severity);
+            await _context.Severities.AddAsync(severity);
             await _context.SaveChangesAsync();
 
             return new CreatedAtRouteResult("GetNewSeverity", new { id = severity.Id }, severity);
@@ -176,7 +176,7 @@ namespace ToDo.BackEnd
                 return BadRequest("Id inválido...");
             }
 
-            _context.Remove(severity);
+            _context.Severities.Remove(severity);
             await _context.SaveChangesAsync();
 
             return Ok("Severidade deletada!");
@@ -237,7 +237,7 @@ namespace ToDo.BackEnd
                 return BadRequest("Afazer não pode ser nulo...");
             }
 
-            await _context.AddAsync(toDo);
+            await _context.ToDos.AddAsync(toDo);
             await _context.SaveChangesAsync();
 
             return new CreatedAtRouteResult("GetNewToDo", new { id = toDo.Id }, toDo);
@@ -267,7 +267,7 @@ namespace ToDo.BackEnd
                 return BadRequest("Id inválido...");
             }
 
-            _context.Remove(toDo);
+            _context.ToDos.Remove(toDo);
             await _context.SaveChangesAsync();
 
             return Ok("Afazer deletado!");
