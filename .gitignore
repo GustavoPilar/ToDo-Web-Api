@@ -1,0 +1,11 @@
+# do not ignore targets
+!*.targets
+packages
+Build
+11.Builds
+.vs
+obj
+bin
+*.cache
+12.Artifacts
+*.user
