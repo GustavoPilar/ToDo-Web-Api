@@ -11,83 +11,70 @@ namespace ToDo.BackEnd
     public class CategoryController : ControllerBase
     {
         #region Fields
-        private readonly ToDoContext _context;
+        private readonly ICategoryRepository _repository;
         #endregion
 
         #region Constructor
-        public CategoryController(ToDoContext context)
+        public CategoryController(ICategoryRepository repository)
         {
-            _context = context;
+            _repository = repository;
         }
         #endregion
 
         #region Actions
         [HttpGet]
-        public async Task<ActionResult<IEnumerable<Category>>> Get()
+        public ActionResult<IEnumerable<Category>> Get()
         {
-            List<Category> categories = await _context.Categories.AsNoTracking().ToListAsync();
-
-            if (categories is null)
-            {
-                return NotFound("Nenhuma categoria foi encontrada...");
-            }
-
+            var categories = _repository.GetCategories();
             return Ok(categories);
         }
 
         [HttpGet("/{id:int}", Name = "GetNewCategory")]
-        public async Task<ActionResult<Category>> GetById(int id)
+        public ActionResult<Category> GetById(int id)
         {
-            Category category = await _context.Categories.AsNoTracking().FirstOrDefaultAsync(c => c.Id == id);
+            var category = _repository.GetCategoryById(id);
 
             if (category is null)
-            {
-                return NotFound("Nenhuma categoria foi encontrada...");
-            }
+                return NotFound($"Categoria de Id {id} não encontrada");
 
             return Ok(category);
         }
 
         [HttpPost]
-        public async Task<ActionResult<Category>> Post(Category category)
+        public ActionResult<Category> Post(Category category)
         {
             if (category is null)
             {
                 return BadRequest("A categoria não pode ser nula...");
             }
 
-            await _context.Categories.AddAsync(category);
-            await _context.SaveChangesAsync();
+            var createdCategory = _repository.Create(category);
 
-            return new CreatedAtRouteResult("GetNewCategory", new { id = category.Id }, category);
+            return new CreatedAtRouteResult("GetNewCategory", new { id = createdCategory.Id }, createdCategory);
         }
 
         [HttpPut("{id:int}")]
-        public async Task<ActionResult<Category>> Put(int id, Category category)
+        public ActionResult<Category> Put(int id, Category category)
         {
             if (id != category.Id)
             {
                 return BadRequest("Id inválido...");
             }
 
-            _context.Entry(category).State = EntityState.Modified;
-            await _context.SaveChangesAsync();
+            var updatedCategory = _repository.Update(category);
 
-            return Ok(category);
+            return Ok(updatedCategory);
         }
 
         [HttpDelete("{id:int}")]
-        public async Task<ActionResult> Delete(int id)
+        public ActionResult Delete(int id)
         {
-            Category category = await _context.Categories.FirstOrDefaultAsync(c => c.Id == id);
+            Category category = _repository.Delete(id);
 
             if (category is null)
             {
                 return BadRequest("Id inválido...");
             }
-
-            _context.Categories.Remove(category);
-            await _context.SaveChangesAsync();
 
             return Ok("Categoria deletada!");
         }

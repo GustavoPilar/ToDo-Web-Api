@@ -28,6 +28,7 @@ namespace ToDo.BackEnd
         #endregion
 
         #region Navigation
+        [JsonIgnore]
         public ICollection<ToDo> ToDos { get; set; }
         #endregion
     }
