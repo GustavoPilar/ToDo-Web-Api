@@ -24,6 +24,8 @@ builder.Services.AddDbContext<ToDoContext>(options => options.UseMySql(connectio
 
 builder.Services.AddScoped<LoggingFilter>();
 builder.Services.AddScoped<ICategoryRepository, CategoryRepository>();
+builder.Services.AddScoped<IToDoRepository, ToDoRepository>();
+builder.Services.AddScoped(typeof(IRepositoryBase<>), typeof(RepositoryBase<>));
 
 builder.Logging.AddProvider(new CustomLoggerProvider(new CustomLoggerProviderConfiguration()
 {

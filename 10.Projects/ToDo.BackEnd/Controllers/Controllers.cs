@@ -178,22 +178,24 @@ namespace ToDo.BackEnd
     public class ToDoController : ControllerBase
     {
         #region Fields
-        private readonly ToDoContext _context;
+        private readonly IRepositoryBase<ToDo> _repository;
+        private readonly IToDoRepository _ToDoRepository;
         #endregion
 
         #region Constructor
-        public ToDoController(ToDoContext context)
+        public ToDoController(IRepositoryBase<ToDo> repository, IToDoRepository toDoRepository)
         {
-            _context = context;
+            _repository = repository;
+            _ToDoRepository = toDoRepository;
         }
         #endregion
 
         #region Actions
         [HttpGet]
         [ServiceFilter(typeof(LoggingFilter))]
-        public async Task<ActionResult<IEnumerable<ToDo>>> Get()
+        public ActionResult<IEnumerable<ToDo>> Get()
         {
-            List<ToDo> toDos = await _context.ToDos.AsNoTracking().ToListAsync();
+            List<ToDo> toDos = _repository.GetAll().ToList();
 
             if (toDos is null)
             {
@@ -204,9 +206,9 @@ namespace ToDo.BackEnd
         }
 
         [HttpGet("{id:int}", Name = "GetNewToDo")]
-        public async Task<ActionResult<ToDo>> GetById(int id)
+        public ActionResult<ToDo> GetById(int id)
         {
-            ToDo toDo = await _context.ToDos.AsNoTracking().FirstOrDefaultAsync(td => td.Id == id);
+            ToDo toDo = _ToDoRepository.GetById(id);
 
             if (toDo is null)
             {
@@ -216,48 +218,58 @@ namespace ToDo.BackEnd
             return Ok(toDo);
         }
 
+        [HttpGet("categoryId/{categoryId:int}")]
+        public ActionResult<IEnumerable<ToDo>> GetByCategory(int categoryId)
+        {
+            List<ToDo> toDos = _ToDoRepository.GetAllByCategory(categoryId).ToList();
+
+            if (toDos is null)
+            {
+                return BadRequest("Nenhum afazer encontrado..");
+            }
+
+            return Ok(toDos);
+        }
+
         [HttpPost]
-        public async Task<ActionResult<ToDo>> Post(ToDo toDo)
+        public ActionResult<ToDo> Post(ToDo toDo)
         {
             if (toDo is null)
             {
                 return BadRequest("Afazer não pode ser nulo...");
             }
 
-            await _context.ToDos.AddAsync(toDo);
-            await _context.SaveChangesAsync();
+            ToDo toDoCreated = _repository.Create(toDo);
 
-            return new CreatedAtRouteResult("GetNewToDo", new { id = toDo.Id }, toDo);
+            return new CreatedAtRouteResult("GetNewToDo", new { id = toDoCreated.Id }, toDoCreated);
         }
 
         [HttpPut("{id:int}")]
-        public async Task<ActionResult<ToDo>> Put(int id, ToDo toDo)
+        public ActionResult<ToDo> Put(int id, ToDo toDo)
         {
             if (id != toDo.Id)
             {
                 return BadRequest("Id inválido...");
             }
 
-            _context.Entry(toDo).State = EntityState.Modified;
-            await _context.SaveChangesAsync();
+            _repository.Update(toDo);
 
             return Ok(toDo);
         }
 
         [HttpDelete("{id:int}")]
-        public async Task<ActionResult> Delete(int id)
+        public ActionResult<ToDo> Delete(int id)
         {
-            ToDo toDo = await _context.ToDos.FirstOrDefaultAsync(td => td.Id == id);
+            ToDo toDo = _ToDoRepository.GetById(id);
 
             if (toDo is null)
             {
                 return BadRequest("Id inválido...");
             }
 
-            _context.ToDos.Remove(toDo);
-            await _context.SaveChangesAsync();
+            ToDo toDoDeleted = _repository.Delete(toDo);
 
-            return Ok("Afazer deletado!");
+            return Ok(toDoDeleted);
         }
         #endregion
     }
