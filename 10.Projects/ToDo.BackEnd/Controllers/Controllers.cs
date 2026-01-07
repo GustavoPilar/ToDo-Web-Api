@@ -11,28 +11,29 @@ namespace ToDo.BackEnd
     public class CategoryController : ControllerBase
     {
         #region Fields
-        private readonly IRepositoryBase<Category> _repository;
+        private readonly IUnitOfWork _unitOfWork;
+
         #endregion
 
         #region Constructor
-        public CategoryController(IRepositoryBase<Category> repository)
+        public CategoryController(IUnitOfWork unitOfWork)
         {
-            _repository = repository;
-        } 
+            _unitOfWork = unitOfWork;
+        }
         #endregion
 
         #region Actions
         [HttpGet]
         public ActionResult<IEnumerable<Category>> Get()
         {
-            var categories = _repository.GetAll().ToList();
+            var categories = _unitOfWork.CategoryRepository.GetAll().ToList();
             return Ok(categories);
         }
 
         [HttpGet("/{id:int}", Name = "GetNewCategory")]
         public ActionResult<Category> GetById(int id)
         {
-            Category category = _repository.GetByProp(x => x.Id == id);
+            Category category = _unitOfWork.CategoryRepository.GetById(id);
 
             if (category is null)
                 return NotFound($"Categoria de Id {id} não encontrada");
@@ -48,7 +49,8 @@ namespace ToDo.BackEnd
                 return BadRequest("A categoria não pode ser nula...");
             }
 
-            Category createdCategory = _repository.Create(category);
+            Category createdCategory = _unitOfWork.CategoryRepository.Create(category);
+            _unitOfWork.Commit();
 
             return new CreatedAtRouteResult("GetNewCategory", new { id = createdCategory.Id }, createdCategory);
         }
@@ -61,7 +63,8 @@ namespace ToDo.BackEnd
                 return BadRequest("Id inválido...");
             }
 
-            Category updatedCategory = _repository.Update(category);
+            Category updatedCategory = _unitOfWork.CategoryRepository.Update(category);
+            _unitOfWork.Commit();
 
             return Ok(updatedCategory);
         }
@@ -69,14 +72,15 @@ namespace ToDo.BackEnd
         [HttpDelete("{id:int}")]
         public ActionResult Delete(int id)
         {
-            Category category = _repository.GetByProp(x => x.Id == id);
+            Category category = _unitOfWork.CategoryRepository.GetById(id);
 
             if (category is null)
             {
                 return BadRequest("Id inválido...");
             }
 
-            _repository.Delete(category);
+            _unitOfWork.CategoryRepository.Delete(category);
+            _unitOfWork.Commit();
 
             return Ok("Categoria deletada!");
         }
@@ -90,13 +94,14 @@ namespace ToDo.BackEnd
     public class SeverityController : ControllerBase
     {
         #region Fields
-        private readonly IRepositoryBase<Severity> _repository;
+        private readonly IUnitOfWork _unitOfWork;
+
         #endregion
 
         #region Constructor
-        public SeverityController(IRepositoryBase<Severity> repository)
+        public SeverityController(IUnitOfWork unitOfWork)
         {
-            _repository = repository;
+            _unitOfWork = unitOfWork;
         }
         #endregion
 
@@ -104,7 +109,7 @@ namespace ToDo.BackEnd
         [HttpGet]
         public ActionResult<IEnumerable<Severity>> Get()
         {
-            List<Severity> severities = _repository.GetAll().ToList();
+            List<Severity> severities = _unitOfWork.SeverityRepository.GetAll().ToList();
 
             if (severities is null)
             {
@@ -117,7 +122,7 @@ namespace ToDo.BackEnd
         [HttpGet("{id:int}", Name = "GetNewSeverity")]
         public ActionResult<Severity> GetById(int id)
         {
-            Severity severity = _repository.GetByProp(se => se.Id == id);
+            Severity severity = _unitOfWork.SeverityRepository.GetById(id);
 
             if (severity is null)
             {
@@ -135,7 +140,8 @@ namespace ToDo.BackEnd
                 return BadRequest("Severidade não pode ser nula...");
             }
 
-            Severity severetyCreated = _repository.Create(severity);
+            Severity severetyCreated = _unitOfWork.SeverityRepository.Create(severity);
+            _unitOfWork.Commit();
 
             return new CreatedAtRouteResult("GetNewSeverity", new { id = severetyCreated.Id }, severetyCreated);
         }
@@ -148,21 +154,24 @@ namespace ToDo.BackEnd
                 return BadRequest("Id inválido..");
             }
 
-            Severity severityUpdated = _repository.Update(severity);
+            Severity severityUpdated = _unitOfWork.SeverityRepository.Update(severity);
+            _unitOfWork.Commit();
+
             return Ok(severityUpdated);
         }
 
         [HttpDelete("{id:int}")]
         public ActionResult Delete(int id)
         {
-            Severity severity = _repository.GetByProp(x => x.Id == id);
+            Severity severity = _unitOfWork.SeverityRepository.GetById(id);
 
             if (severity is null)
             {
                 return BadRequest("Id inválido...");
             }
 
-            _repository.Delete(severity);
+            _unitOfWork.SeverityRepository.Delete(severity);
+            _unitOfWork.Commit();
 
             return Ok("Severidade deletada!");
         }
@@ -176,15 +185,13 @@ namespace ToDo.BackEnd
     public class ToDoController : ControllerBase
     {
         #region Fields
-        private readonly IToDoRepository _toDoRepository;
-        private readonly IRepositoryBase<ToDo> _repository;
+        private readonly IUnitOfWork _unitOfWork;
         #endregion
 
         #region Constructor
-        public ToDoController(IRepositoryBase<ToDo> repository, IToDoRepository toDoRepository)
+        public ToDoController(IUnitOfWork unitOfWork)
         {
-            _repository = repository;
-            _toDoRepository = toDoRepository;
+            _unitOfWork = unitOfWork;
         }
         #endregion
 
@@ -193,7 +200,7 @@ namespace ToDo.BackEnd
         [ServiceFilter(typeof(LoggingFilter))]
         public ActionResult<IEnumerable<ToDo>> Get()
         {
-            List<ToDo> toDos = _repository.GetAll().ToList();
+            List<ToDo> toDos = _unitOfWork.ToDoRepository.GetAll().ToList();
 
             if (toDos is null)
             {
@@ -206,7 +213,7 @@ namespace ToDo.BackEnd
         [HttpGet("{id:int}", Name = "GetNewToDo")]
         public ActionResult<ToDo> GetById(int id)
         {
-            ToDo toDo = _repository.GetByProp(x => x.Id == id);
+            ToDo toDo = _unitOfWork.ToDoRepository.GetById(id);
 
             if (toDo is null)
             {
@@ -219,7 +226,7 @@ namespace ToDo.BackEnd
         [HttpGet("categoryId/{categoryId:int}")]
         public ActionResult<IEnumerable<ToDo>> GetByCategory(int categoryId)
         {
-            List<ToDo> toDos = _toDoRepository.GetAllByCategory(categoryId).ToList();
+            List<ToDo> toDos = _unitOfWork.ToDoRepository.GetAllByCategory(categoryId).ToList();
 
             if (toDos is null)
             {
@@ -237,7 +244,7 @@ namespace ToDo.BackEnd
                 return BadRequest("Afazer não pode ser nulo...");
             }
 
-            ToDo toDoCreated = _repository.Create(toDo);
+            ToDo toDoCreated = _unitOfWork.ToDoRepository.Create(toDo);
 
             return new CreatedAtRouteResult("GetNewToDo", new { id = toDoCreated.Id }, toDoCreated);
         }
@@ -250,24 +257,25 @@ namespace ToDo.BackEnd
                 return BadRequest("Id inválido...");
             }
 
-            _repository.Update(toDo);
+            _unitOfWork.ToDoRepository.Update(toDo);
 
             return Ok(toDo);
         }
 
         [HttpDelete("{id:int}")]
-        public ActionResult<ToDo> Delete(int id)
+        public ActionResult Delete(int id)
         {
-            ToDo toDo = _repository.GetByProp(x => x.Id == id);
+            ToDo toDo = _unitOfWork.ToDoRepository.GetById(id);
 
             if (toDo is null)
             {
                 return BadRequest("Id inválido...");
             }
 
-            ToDo toDoDeleted = _repository.Delete(toDo);
+            _unitOfWork.ToDoRepository.Delete(toDo);
+            _unitOfWork.Commit();
 
-            return Ok(toDoDeleted);
+            return Ok("Afazer deletado...");
         }
         #endregion
     }
