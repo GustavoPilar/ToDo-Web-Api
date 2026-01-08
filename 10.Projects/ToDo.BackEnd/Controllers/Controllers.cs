@@ -6,309 +6,300 @@ namespace ToDo.BackEnd
 {
     #region Controllers :: CategoryController, SeverityController, ToDoController
 
-    #region CategoryController
     [ApiController]
     [Route("[Controller]")]
-    public class CategoryController : ControllerBase
+    public class CategoryController : CrudBaseController<Category, CategoryDTO>
     {
-        #region Fields
-        private readonly IUnitOfWork _unitOfWork;
-
-        #endregion
-
-        #region Constructor
-        public CategoryController(IUnitOfWork unitOfWork)
+        public CategoryController(IUnitOfWork unitOfWork) : base(unitOfWork)
         {
-            _unitOfWork = unitOfWork;
         }
-        #endregion
-
-        #region Actions
-        [HttpGet]
-        public ActionResult<IEnumerable<CategoryDTO>> Get()
-        {
-            List<Category> categories = _unitOfWork.CategoryRepository.GetAll().ToList();
-
-            if (categories is null)
-            {
-                return NotFound("Nenhum afazer foi encontrado"); 
-            }
-
-            List<CategoryDTO> categoriesDTO = categories.ToCategoryDTOList().ToList();
-
-            return Ok(categoriesDTO);
-        }
-
-        [HttpGet("/{id:int}", Name = "GetNewCategory")]
-        public ActionResult<CategoryDTO> GetById(int id)
-        {
-            Category category = _unitOfWork.CategoryRepository.GetById(id);
-
-            if (category is null)
-                return NotFound($"Categoria de Id {id} não encontrada");
-
-            CategoryDTO categoryDTO = category.ToCategoryDTO();
-
-            return Ok(categoryDTO);
-        }
-
-        [HttpPost]
-        public ActionResult<CategoryDTO> Post(CategoryDTO categoryDto)
-        {
-            if (categoryDto is null)
-            {
-                return BadRequest("A categoria não pode ser nula...");
-            }
-
-            Category category = categoryDto.ToCategory();
-
-            Category createdCategory = _unitOfWork.CategoryRepository.Create(category);
-            _unitOfWork.Commit();
-
-            CategoryDTO NewCategoryDTO = category.ToCategoryDTO();
-
-            return new CreatedAtRouteResult("GetNewCategory", new { id = NewCategoryDTO.Id }, NewCategoryDTO);
-        }
-
-        [HttpPut("{id:int}")]
-        public ActionResult<CategoryDTO> Put(int id, CategoryDTO categoryDTO)
-        {
-            if (id != categoryDTO.Id)
-            {
-                return BadRequest("Id inválido...");
-            }
-
-            Category category = categoryDTO.ToCategory();
-
-            Category updatedCategory = _unitOfWork.CategoryRepository.Update(category);
-            _unitOfWork.Commit();
-
-            CategoryDTO updatedCategoryDTO = category.ToCategoryDTO();
-
-            return Ok(updatedCategoryDTO);
-        }
-
-        [HttpDelete("{id:int}")]
-        public ActionResult Delete(int id)
-        {
-            Category category = _unitOfWork.CategoryRepository.GetById(id);
-
-            if (category is null)
-            {
-                return BadRequest("Id inválido...");
-            }
-
-            _unitOfWork.CategoryRepository.Delete(category);
-            _unitOfWork.Commit();
-
-            return Ok("Categoria deletada!");
-        }
-        #endregion
     }
-    #endregion
 
-    #region SeverityController
-    [ApiController]
-    [Route("[Controller]")]
-    public class SeverityController : ControllerBase
-    {
-        #region Fields
-        private readonly IUnitOfWork _unitOfWork;
+    //#region CategoryController
+    //[ApiController]
+    //[Route("[Controller]")]
+    //public class CategoryController : ControllerBase
+    //{
+    //    #region Fields
+    //    private readonly IUnitOfWork _unitOfWork;
+    //    #endregion
 
-        #endregion
+    //    #region Constructor
+    //    public CategoryController(IUnitOfWork unitOfWork)
+    //    {
+    //        _unitOfWork = unitOfWork;
+    //    }
+    //    #endregion
 
-        #region Constructor
-        public SeverityController(IUnitOfWork unitOfWork)
-        {
-            _unitOfWork = unitOfWork;
-        }
-        #endregion
+    //    #region Actions
+    //    [HttpGet]
+    //    public ActionResult<IEnumerable<CategoryDTO>> Get()
+    //    {
+    //        IEnumerable<CategoryDTO> categories = _unitOfWork.CategoryRepository.GetAll().ToList().ToCategoryDTOListCast();
 
-        #region Actions
-        [HttpGet]
-        public ActionResult<IEnumerable<Severity>> Get()
-        {
-            List<Severity> severities = _unitOfWork.SeverityRepository.GetAll().ToList();
+    //        if (categories is null)
+    //        {
+    //            return NotFound("Nenhum afazer foi encontrado");
+    //        }
 
-            if (severities is null)
-            {
-                return NotFound("Nenhuma severidade foi encontrada...");
-            }
+    //        return Ok(categories.ToList());
+    //    }
 
-            return Ok(severities);
-        }
+    //    [HttpGet("/{id:int}", Name = "GetNewCategory")]
+    //    public ActionResult<CategoryDTO> GetById(int id)
+    //    {
+    //        Category category = _unitOfWork.CategoryRepository.GetById(id);
 
-        [HttpGet("{id:int}", Name = "GetNewSeverity")]
-        public ActionResult<Severity> GetById(int id)
-        {
-            Severity severity = _unitOfWork.SeverityRepository.GetById(id);
+    //        if (category is null)
+    //            return NotFound($"Categoria de Id {id} não encontrada");
 
-            if (severity is null)
-            {
-                return BadRequest("Nenhuma severidade foi encontrada...");
-            }
+    //        return Ok(category.ToCategoryDTOCast());
+    //    }
 
-            return Ok(severity);
-        }
+    //    [HttpPost]
+    //    public ActionResult<CategoryDTO> Post(CategoryDTO categoryDTO)
+    //    {
+    //        if (categoryDTO is null)
+    //        {
+    //            return BadRequest("A categoria não pode ser nula...");
+    //        }
 
-        [HttpPost]
-        public ActionResult<Severity> Post(Severity severity)
-        {
-            if (severity == null)
-            {
-                return BadRequest("Severidade não pode ser nula...");
-            }
+    //        Category createdCategory = _unitOfWork.CategoryRepository.Create(categoryDTO.ToCategoryCast());
+    //        _unitOfWork.Commit();
 
-            Severity severetyCreated = _unitOfWork.SeverityRepository.Create(severity);
-            _unitOfWork.Commit();
+    //        CategoryDTO NewCategoryDTO = createdCategory.ToCategoryDTOCast();
 
-            return new CreatedAtRouteResult("GetNewSeverity", new { id = severetyCreated.Id }, severetyCreated);
-        }
+    //        return new CreatedAtRouteResult("GetNewCategory", new { id = NewCategoryDTO.Id }, NewCategoryDTO);
+    //    }
 
-        [HttpPut("{id:int}")]
-        public ActionResult<Severity> Put(int id, Severity severity)
-        {
-            if (id != severity.Id)
-            {
-                return BadRequest("Id inválido..");
-            }
+    //    [HttpPut("{id:int}")]
+    //    public ActionResult<CategoryDTO> Put(int id, CategoryDTO categoryDTO)
+    //    {
+    //        if (id != categoryDTO.Id)
+    //        {
+    //            return BadRequest("Id inválido...");
+    //        }
 
-            Severity severityUpdated = _unitOfWork.SeverityRepository.Update(severity);
-            _unitOfWork.Commit();
+    //        Category updatedCategory = _unitOfWork.CategoryRepository.Update(categoryDTO.ToCategoryCast());
+    //        _unitOfWork.Commit();
 
-            return Ok(severityUpdated);
-        }
+    //        return Ok(updatedCategory.ToCategoryDTOCast());
+    //    }
 
-        [HttpDelete("{id:int}")]
-        public ActionResult Delete(int id)
-        {
-            Severity severity = _unitOfWork.SeverityRepository.GetById(id);
+    //    [HttpDelete("{id:int}")]
+    //    public ActionResult Delete(int id)
+    //    {
+    //        Category category = _unitOfWork.CategoryRepository.GetById(id);
 
-            if (severity is null)
-            {
-                return BadRequest("Id inválido...");
-            }
+    //        if (category is null)
+    //        {
+    //            return BadRequest("Id inválido...");
+    //        }
 
-            _unitOfWork.SeverityRepository.Delete(severity);
-            _unitOfWork.Commit();
+    //        _unitOfWork.CategoryRepository.Delete(category);
+    //        _unitOfWork.Commit();
 
-            return Ok("Severidade deletada!");
-        }
-        #endregion
-    }
-    #endregion
+    //        return Ok("Categoria deletada!");
+    //    }
+    //    #endregion
+    //}
+    //#endregion
 
-    #region ToDoController
-    [ApiController]
-    [Route("[Controller]")]
-    public class ToDoController : ControllerBase
-    {
-        #region Fields
-        private readonly IUnitOfWork _unitOfWork;
-        private readonly IMapper _mapper;
-        #endregion
+    //#region SeverityController
+    //[ApiController]
+    //[Route("[Controller]")]
+    //public class SeverityController : ControllerBase
+    //{
+    //    #region Fields
+    //    private readonly IUnitOfWork _unitOfWork;
+    //    #endregion
 
-        #region Constructor
-        public ToDoController(IUnitOfWork unitOfWork, IMapper mapper)
-        {
-            _unitOfWork = unitOfWork;
-            _mapper = mapper;
-        }
-        #endregion
+    //    #region Constructor
+    //    public SeverityController(IUnitOfWork unitOfWork)
+    //    {
+    //        _unitOfWork = unitOfWork;
+    //    }
+    //    #endregion
 
-        #region Actions
-        [HttpGet]
-        [ServiceFilter(typeof(LoggingFilter))]
-        public ActionResult<IEnumerable<ToDoDTO>> Get()
-        {
-            List<ToDo> toDos = _unitOfWork.ToDoRepository.GetAll().ToList();
+    //    #region Actions
+    //    [HttpGet]
+    //    public ActionResult<IEnumerable<SeverityDTO>> Get()
+    //    {
+    //        List<Severity> severities = _unitOfWork.SeverityRepository.GetAll().ToList();
 
-            if (toDos is null)
-            {
-                return BadRequest("Nenhum afazer encontrado...");
-            }
+    //        if (severities is null)
+    //        {
+    //            return NotFound("Nenhuma severidade foi encontrada...");
+    //        }
 
-            List<ToDoDTO> toDoDtos = _mapper.Map<IEnumerable<ToDoDTO>>(toDos).ToList(); 
-             
-            return Ok(toDoDtos);
-        }
+    //        return Ok(severities.ToSeverityDTOListCast().ToList());
+    //    }
 
-        [HttpGet("{id:int}", Name = "GetNewToDo")]
-        public ActionResult<ToDoDTO> GetById(int id)
-        {
-            ToDo toDo = _unitOfWork.ToDoRepository.GetById(id);
+    //    [HttpGet("{id:int}", Name = "GetNewSeverity")]
+    //    public ActionResult<SeverityDTO> GetById(int id)
+    //    {
+    //        Severity severity = _unitOfWork.SeverityRepository.GetById(id);
 
-            if (toDo is null)
-            {
-                return BadRequest("Nenhum afazer encontrado...");
-            }
+    //        if (severity is null)
+    //        {
+    //            return BadRequest("Nenhuma severidade foi encontrada...");
+    //        }
 
-            ToDoDTO toDoDTO = _mapper.Map<ToDoDTO>(toDo);
+    //        return Ok(severity.ToSeverityDTOCast());
+    //    }
 
-            return Ok(toDoDTO);
-        }
+    //    [HttpPost]
+    //    public ActionResult<SeverityDTO> Post(SeverityDTO severityDTO)
+    //    {
+    //        if (severityDTO == null)
+    //        {
+    //            return BadRequest("Severidade não pode ser nula...");
+    //        }
 
-        [HttpGet("categoryId/{categoryId:int}")]
-        public ActionResult<IEnumerable<ToDoDTO>> GetByCategory(int categoryId)
-        {
-            List<ToDo> toDos = _unitOfWork.ToDoRepository.GetAllByCategory(categoryId).ToList();
+    //        Severity severity = _unitOfWork.SeverityRepository.Create(severityDTO.ToSeverityCast());
+    //        _unitOfWork.Commit();
 
-            if (toDos is null)
-            {
-                return BadRequest("Nenhum afazer encontrado..");
-            }
+    //        SeverityDTO createdSeverity = severity.ToSeverityDTOCast();
 
-            List<ToDoDTO> toDosDTO = _mapper.Map<IEnumerable<ToDoDTO>>(toDos).ToList();
+    //        return new CreatedAtRouteResult("GetNewSeverity", new { id = createdSeverity.Id }, createdSeverity);
+    //    }
 
-            return Ok(toDosDTO);
-        }
+    //    [HttpPut("{id:int}")]
+    //    public ActionResult<SeverityDTO> Put(int id, SeverityDTO severityDTO)
+    //    {
+    //        if (id != severityDTO.Id)
+    //        {
+    //            return BadRequest("Id inválido..");
+    //        }
 
-        [HttpPost]
-        public ActionResult<ToDoDTO> Post(ToDoDTO toDoDTO)
-        {
-            if (toDoDTO is null)
-            {
-                return BadRequest("Afazer não pode ser nulo...");
-            }
+    //        Severity updatedSeverity = _unitOfWork.SeverityRepository.Update(severityDTO.ToSeverityCast());
+    //        _unitOfWork.Commit();
 
-            ToDo toDoCreated = _unitOfWork.ToDoRepository.Create(_mapper.Map<ToDo>(toDoDTO));
-            ToDoDTO CreatedtoDoDTO = _mapper.Map<ToDoDTO>(toDoCreated);
+    //        return Ok(updatedSeverity.ToSeverityDTOCast());
+    //    }
 
-            return new CreatedAtRouteResult("GetNewToDo", new { id = CreatedtoDoDTO.Id }, CreatedtoDoDTO);
-        }
+    //    [HttpDelete("{id:int}")]
+    //    public ActionResult Delete(int id)
+    //    {
+    //        Severity severity = _unitOfWork.SeverityRepository.GetById(id);
 
-        [HttpPut("{id:int}")]
-        public ActionResult<ToDoDTO> Put(int id, ToDoDTO toDoDTO)
-        {
-            if (id != toDoDTO.Id)
-            {
-                return BadRequest("Id inválido...");
-            }
+    //        if (severity is null)
+    //        {
+    //            return BadRequest("Id inválido...");
+    //        }
 
-            ToDo toDo = _mapper.Map<ToDo>(toDoDTO);
-            _unitOfWork.ToDoRepository.Update(toDo);
-            ToDoDTO updatedToDoDTO = _mapper.Map<ToDoDTO>(toDo);
+    //        _unitOfWork.SeverityRepository.Delete(severity);
+    //        _unitOfWork.Commit();
 
-            return Ok(updatedToDoDTO);
-        }
+    //        return Ok("Severidade deletada!");
+    //    }
+    //    #endregion
+    //}
+    //#endregion
 
-        [HttpDelete("{id:int}")]
-        public ActionResult Delete(int id)
-        {
-            ToDo toDo = _unitOfWork.ToDoRepository.GetById(id);
+    //#region ToDoController
+    //[ApiController]
+    //[Route("[Controller]")]
+    //public class ToDoController : ControllerBase
+    //{
+    //    #region Fields
+    //    private readonly IUnitOfWork _unitOfWork;
+    //    #endregion
 
-            if (toDo is null)
-            {
-                return BadRequest("Id inválido...");
-            }
+    //    #region Constructor
+    //    public ToDoController(IUnitOfWork unitOfWork)
+    //    {
+    //        _unitOfWork = unitOfWork;
+    //    }
+    //    #endregion
 
-            _unitOfWork.ToDoRepository.Delete(toDo);
-            _unitOfWork.Commit();
+    //    #region Actions
+    //    [HttpGet]
+    //    [ServiceFilter(typeof(LoggingFilter))]
+    //    public ActionResult<IEnumerable<ToDoDTO>> Get()
+    //    {
+    //        List<ToDo> toDos = _unitOfWork.ToDoRepository.GetAll().ToList();
 
-            return Ok("Afazer deletado...");
-        }
-        #endregion
-    }
-    #endregion
+    //        if (toDos is null)
+    //        {
+    //            return BadRequest("Nenhum afazer encontrado...");
+    //        }
+
+    //        return Ok(toDos.ToToDoDTOListCast().ToList());
+    //    }
+
+    //    [HttpGet("{id:int}", Name = "GetNewToDo")]
+    //    public ActionResult<ToDoDTO> GetById(int id)
+    //    {
+    //        ToDo toDo = _unitOfWork.ToDoRepository.GetById(id);
+
+    //        if (toDo is null)
+    //        {
+    //            return BadRequest("Nenhum afazer encontrado...");
+    //        }
+
+    //        return Ok(toDo.ToToDoDTOCast());
+    //    }
+
+    //    [HttpGet("categoryId/{categoryId:int}")]
+    //    public ActionResult<IEnumerable<ToDoDTO>> GetByCategory(int categoryId)
+    //    {
+    //        List<ToDo> toDos = _unitOfWork.ToDoRepository.GetAllByCategory(categoryId).ToList();
+
+    //        if (toDos is null)
+    //        {
+    //            return BadRequest("Nenhum afazer encontrado..");
+    //        }
+
+    //        return Ok(toDos.ToToDoDTOListCast().ToList());
+    //    }
+
+    //    [HttpPost]
+    //    public ActionResult<ToDoDTO> Post(ToDoDTO toDoDTO)
+    //    {
+    //        if (toDoDTO is null)
+    //        {
+    //            return BadRequest("Afazer não pode ser nulo...");
+    //        }
+
+    //        ToDo toDo = _unitOfWork.ToDoRepository.Create(toDoDTO.ToToDoCast());
+    //        _unitOfWork.Commit();
+    //        ToDoDTO createdtoDoDTO = toDo.ToToDoDTOCast();
+
+    //        return new CreatedAtRouteResult("GetNewToDo", new { id = createdtoDoDTO.Id }, createdtoDoDTO);
+    //    }
+
+    //    [HttpPut("{id:int}")]
+    //    public ActionResult<ToDoDTO> Put(int id, ToDoDTO toDoDTO)
+    //    {
+    //        if (id != toDoDTO.Id)
+    //        {
+    //            return BadRequest("Id inválido...");
+    //        }
+
+    //        ToDo updatedToDo = _unitOfWork.ToDoRepository.Update(toDoDTO.ToToDoCast());
+    //        _unitOfWork.Commit();
+
+    //        return Ok(updatedToDo.ToToDoDTOCast());
+    //    }
+
+    //    [HttpDelete("{id:int}")]
+    //    public ActionResult Delete(int id)
+    //    {
+    //        ToDo toDo = _unitOfWork.ToDoRepository.GetById(id);
+
+    //        if (toDo is null)
+    //        {
+    //            return BadRequest("Id inválido...");
+    //        }
+
+    //        _unitOfWork.ToDoRepository.Delete(toDo);
+    //        _unitOfWork.Commit();
+
+    //        return Ok("Afazer deletado...");
+    //    }
+    //    #endregion
+    //}
+    //#endregion
     #endregion
 }

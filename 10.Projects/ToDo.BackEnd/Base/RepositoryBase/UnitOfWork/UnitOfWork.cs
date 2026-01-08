@@ -1,4 +1,6 @@
-﻿namespace ToDo.BackEnd
+﻿using System.Collections.Concurrent;
+
+namespace ToDo.BackEnd
 {
     public class UnitOfWork : IUnitOfWork
     {
@@ -8,7 +10,9 @@
 
         private IToDoRepository _toDoRepository;
 
-        public ToDoContext _context;
+        public readonly ToDoContext _context;
+
+        private readonly ConcurrentDictionary<Type, object> repositories = new();
 
         public UnitOfWork(ToDoContext context)
         {
@@ -47,6 +51,14 @@
         public void Dispose()
         {
             _context.Dispose();
+        }
+
+        public IRepositoryBase<T> Repository<T>() where T : class
+        {
+            return (IRepositoryBase<T>)repositories.GetOrAdd(
+                typeof(T),
+                _ => new RepositoryBase<T>(_context)
+            );
         }
     }
 }

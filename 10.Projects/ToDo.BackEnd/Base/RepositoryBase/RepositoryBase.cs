@@ -22,6 +22,12 @@ namespace ToDo.BackEnd
         {
             return _context.Set<T>().AsNoTracking().ToList();
         }
+
+        public virtual T? GetById(int id)
+        {
+            return _context.Set<T>().FirstOrDefault(x => (int)(x.GetType().GetProperty("Id").GetValue(x)) == id);
+        }
+
         public IEnumerable<T> GetAllByProp(Expression<Func<T, bool>> predicate)
         {
             return _context.Set<T>().Where(predicate).AsNoTracking().ToList();
@@ -45,6 +51,7 @@ namespace ToDo.BackEnd
             _context.Set<T>().Remove(entity);
             return entity;
         }
+
         #endregion
     }
 }

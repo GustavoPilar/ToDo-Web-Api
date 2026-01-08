@@ -29,8 +29,6 @@ builder.Services.AddScoped<IToDoRepository, ToDoRepository>();
 builder.Services.AddScoped(typeof(IRepositoryBase<>), typeof(RepositoryBase<>));
 builder.Services.AddScoped<IUnitOfWork, UnitOfWork>();
 
-builder.Services.AddAutoMapper(typeof(EntityDTOMappingProfile));
-
 builder.Logging.AddProvider(new CustomLoggerProvider(new CustomLoggerProviderConfiguration()
 {
     LogLevel = LogLevel.Information
