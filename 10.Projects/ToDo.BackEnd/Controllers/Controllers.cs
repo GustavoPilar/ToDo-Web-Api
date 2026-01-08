@@ -24,55 +24,108 @@ namespace ToDo.BackEnd
 
         #region Actions
         [HttpGet]
-        public ActionResult<IEnumerable<Category>> Get()
+        public ActionResult<IEnumerable<CategoryDTO>> Get()
         {
             var categories = _unitOfWork.CategoryRepository.GetAll().ToList();
-            return Ok(categories);
+
+            if (categories is null)
+            {
+                return NotFound("Nenhum afazer foi encontrado"); 
+            }
+
+            List<CategoryDTO> categoriesDTO = new List<CategoryDTO>();
+            foreach (var category in categories)
+            {
+                CategoryDTO categoryDTO = new CategoryDTO()
+                {
+                    Id = category.Id,
+                    Code = category.Code,
+                    Description = category.Description
+                };
+                categoriesDTO.Add(categoryDTO);
+            }
+
+            return Ok(categoriesDTO);
         }
 
         [HttpGet("/{id:int}", Name = "GetNewCategory")]
-        public ActionResult<Category> GetById(int id)
+        public ActionResult<CategoryDTO> GetById(int id)
         {
-            Category category = _unitOfWork.CategoryRepository.GetById(id);
+            var category = _unitOfWork.CategoryRepository.GetById(id);
 
             if (category is null)
                 return NotFound($"Categoria de Id {id} não encontrada");
 
-            return Ok(category);
+            var categoryDTO = new CategoryDTO()
+            {
+                Id = category.Id,
+                Code = category.Code,
+                Description = category.Description,
+            };
+
+            return Ok(categoryDTO);
         }
 
         [HttpPost]
-        public ActionResult<Category> Post(Category category)
+        public ActionResult<CategoryDTO> Post(CategoryDTO categoryDto)
         {
-            if (category is null)
+            if (categoryDto is null)
             {
                 return BadRequest("A categoria não pode ser nula...");
             }
 
-            Category createdCategory = _unitOfWork.CategoryRepository.Create(category);
+            Category category = new Category()
+            {
+                Id = categoryDto.Id,
+                Code = categoryDto.Code,
+                Description = categoryDto.Description
+            };
+
+            var createdCategory = _unitOfWork.CategoryRepository.Create(category);
             _unitOfWork.Commit();
 
-            return new CreatedAtRouteResult("GetNewCategory", new { id = createdCategory.Id }, createdCategory);
+            CategoryDTO NewCategoryDTO = new CategoryDTO()
+            {
+                Id = createdCategory.Id,
+                Code = createdCategory.Code,
+                Description = createdCategory.Description
+            };
+
+            return new CreatedAtRouteResult("GetNewCategory", new { id = NewCategoryDTO.Id }, NewCategoryDTO);
         }
 
         [HttpPut("{id:int}")]
-        public ActionResult<Category> Put(int id, Category category)
+        public ActionResult<CategoryDTO> Put(int id, CategoryDTO categoryDTO)
         {
-            if (id != category.Id)
+            if (id != categoryDTO.Id)
             {
                 return BadRequest("Id inválido...");
             }
 
-            Category updatedCategory = _unitOfWork.CategoryRepository.Update(category);
+            Category category = new Category()
+            {
+                Id = categoryDTO.Id,
+                Code = categoryDTO.Code,
+                Description = categoryDTO.Description
+            };
+
+            var updatedCategory = _unitOfWork.CategoryRepository.Update(category);
             _unitOfWork.Commit();
 
-            return Ok(updatedCategory);
+            CategoryDTO updatedCategoryDTO = new CategoryDTO()
+            {
+                Id = categoryDTO.Id,
+                Code = categoryDTO.Code,
+                Description = categoryDTO.Description
+            };
+
+            return Ok(updatedCategoryDTO);
         }
 
         [HttpDelete("{id:int}")]
         public ActionResult Delete(int id)
         {
-            Category category = _unitOfWork.CategoryRepository.GetById(id);
+            var category = _unitOfWork.CategoryRepository.GetById(id);
 
             if (category is null)
             {
