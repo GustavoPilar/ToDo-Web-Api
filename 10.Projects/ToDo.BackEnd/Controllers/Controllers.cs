@@ -26,24 +26,14 @@ namespace ToDo.BackEnd
         [HttpGet]
         public ActionResult<IEnumerable<CategoryDTO>> Get()
         {
-            var categories = _unitOfWork.CategoryRepository.GetAll().ToList();
+            List<Category> categories = _unitOfWork.CategoryRepository.GetAll().ToList();
 
             if (categories is null)
             {
                 return NotFound("Nenhum afazer foi encontrado"); 
             }
 
-            List<CategoryDTO> categoriesDTO = new List<CategoryDTO>();
-            foreach (var category in categories)
-            {
-                CategoryDTO categoryDTO = new CategoryDTO()
-                {
-                    Id = category.Id,
-                    Code = category.Code,
-                    Description = category.Description
-                };
-                categoriesDTO.Add(categoryDTO);
-            }
+            List<CategoryDTO> categoriesDTO = categories.ToCategoryDTOList().ToList();
 
             return Ok(categoriesDTO);
         }
@@ -51,17 +41,12 @@ namespace ToDo.BackEnd
         [HttpGet("/{id:int}", Name = "GetNewCategory")]
         public ActionResult<CategoryDTO> GetById(int id)
         {
-            var category = _unitOfWork.CategoryRepository.GetById(id);
+            Category category = _unitOfWork.CategoryRepository.GetById(id);
 
             if (category is null)
                 return NotFound($"Categoria de Id {id} não encontrada");
 
-            var categoryDTO = new CategoryDTO()
-            {
-                Id = category.Id,
-                Code = category.Code,
-                Description = category.Description,
-            };
+            CategoryDTO categoryDTO = category.ToCategoryDTO();
 
             return Ok(categoryDTO);
         }
@@ -74,22 +59,12 @@ namespace ToDo.BackEnd
                 return BadRequest("A categoria não pode ser nula...");
             }
 
-            Category category = new Category()
-            {
-                Id = categoryDto.Id,
-                Code = categoryDto.Code,
-                Description = categoryDto.Description
-            };
+            Category category = categoryDto.ToCategory();
 
-            var createdCategory = _unitOfWork.CategoryRepository.Create(category);
+            Category createdCategory = _unitOfWork.CategoryRepository.Create(category);
             _unitOfWork.Commit();
 
-            CategoryDTO NewCategoryDTO = new CategoryDTO()
-            {
-                Id = createdCategory.Id,
-                Code = createdCategory.Code,
-                Description = createdCategory.Description
-            };
+            CategoryDTO NewCategoryDTO = category.ToCategoryDTO();
 
             return new CreatedAtRouteResult("GetNewCategory", new { id = NewCategoryDTO.Id }, NewCategoryDTO);
         }
@@ -102,22 +77,12 @@ namespace ToDo.BackEnd
                 return BadRequest("Id inválido...");
             }
 
-            Category category = new Category()
-            {
-                Id = categoryDTO.Id,
-                Code = categoryDTO.Code,
-                Description = categoryDTO.Description
-            };
+            Category category = categoryDTO.ToCategory();
 
-            var updatedCategory = _unitOfWork.CategoryRepository.Update(category);
+            Category updatedCategory = _unitOfWork.CategoryRepository.Update(category);
             _unitOfWork.Commit();
 
-            CategoryDTO updatedCategoryDTO = new CategoryDTO()
-            {
-                Id = categoryDTO.Id,
-                Code = categoryDTO.Code,
-                Description = categoryDTO.Description
-            };
+            CategoryDTO updatedCategoryDTO = category.ToCategoryDTO();
 
             return Ok(updatedCategoryDTO);
         }
@@ -125,7 +90,7 @@ namespace ToDo.BackEnd
         [HttpDelete("{id:int}")]
         public ActionResult Delete(int id)
         {
-            var category = _unitOfWork.CategoryRepository.GetById(id);
+            Category category = _unitOfWork.CategoryRepository.GetById(id);
 
             if (category is null)
             {
