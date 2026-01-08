@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using AutoMapper;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 
 namespace ToDo.BackEnd
@@ -204,19 +205,21 @@ namespace ToDo.BackEnd
     {
         #region Fields
         private readonly IUnitOfWork _unitOfWork;
+        private readonly IMapper _mapper;
         #endregion
 
         #region Constructor
-        public ToDoController(IUnitOfWork unitOfWork)
+        public ToDoController(IUnitOfWork unitOfWork, IMapper mapper)
         {
             _unitOfWork = unitOfWork;
+            _mapper = mapper;
         }
         #endregion
 
         #region Actions
         [HttpGet]
         [ServiceFilter(typeof(LoggingFilter))]
-        public ActionResult<IEnumerable<ToDo>> Get()
+        public ActionResult<IEnumerable<ToDoDTO>> Get()
         {
             List<ToDo> toDos = _unitOfWork.ToDoRepository.GetAll().ToList();
 
@@ -225,11 +228,13 @@ namespace ToDo.BackEnd
                 return BadRequest("Nenhum afazer encontrado...");
             }
 
-            return Ok(toDos);
+            List<ToDoDTO> toDoDtos = _mapper.Map<IEnumerable<ToDoDTO>>(toDos).ToList(); 
+             
+            return Ok(toDoDtos);
         }
 
         [HttpGet("{id:int}", Name = "GetNewToDo")]
-        public ActionResult<ToDo> GetById(int id)
+        public ActionResult<ToDoDTO> GetById(int id)
         {
             ToDo toDo = _unitOfWork.ToDoRepository.GetById(id);
 
@@ -238,11 +243,13 @@ namespace ToDo.BackEnd
                 return BadRequest("Nenhum afazer encontrado...");
             }
 
-            return Ok(toDo);
+            ToDoDTO toDoDTO = _mapper.Map<ToDoDTO>(toDo);
+
+            return Ok(toDoDTO);
         }
 
         [HttpGet("categoryId/{categoryId:int}")]
-        public ActionResult<IEnumerable<ToDo>> GetByCategory(int categoryId)
+        public ActionResult<IEnumerable<ToDoDTO>> GetByCategory(int categoryId)
         {
             List<ToDo> toDos = _unitOfWork.ToDoRepository.GetAllByCategory(categoryId).ToList();
 
@@ -251,33 +258,38 @@ namespace ToDo.BackEnd
                 return BadRequest("Nenhum afazer encontrado..");
             }
 
-            return Ok(toDos);
+            List<ToDoDTO> toDosDTO = _mapper.Map<IEnumerable<ToDoDTO>>(toDos).ToList();
+
+            return Ok(toDosDTO);
         }
 
         [HttpPost]
-        public ActionResult<ToDo> Post(ToDo toDo)
+        public ActionResult<ToDoDTO> Post(ToDoDTO toDoDTO)
         {
-            if (toDo is null)
+            if (toDoDTO is null)
             {
                 return BadRequest("Afazer não pode ser nulo...");
             }
 
-            ToDo toDoCreated = _unitOfWork.ToDoRepository.Create(toDo);
+            ToDo toDoCreated = _unitOfWork.ToDoRepository.Create(_mapper.Map<ToDo>(toDoDTO));
+            ToDoDTO CreatedtoDoDTO = _mapper.Map<ToDoDTO>(toDoCreated);
 
-            return new CreatedAtRouteResult("GetNewToDo", new { id = toDoCreated.Id }, toDoCreated);
+            return new CreatedAtRouteResult("GetNewToDo", new { id = CreatedtoDoDTO.Id }, CreatedtoDoDTO);
         }
 
         [HttpPut("{id:int}")]
-        public ActionResult<ToDo> Put(int id, ToDo toDo)
+        public ActionResult<ToDoDTO> Put(int id, ToDoDTO toDoDTO)
         {
-            if (id != toDo.Id)
+            if (id != toDoDTO.Id)
             {
                 return BadRequest("Id inválido...");
             }
 
+            ToDo toDo = _mapper.Map<ToDo>(toDoDTO);
             _unitOfWork.ToDoRepository.Update(toDo);
+            ToDoDTO updatedToDoDTO = _mapper.Map<ToDoDTO>(toDo);
 
-            return Ok(toDo);
+            return Ok(updatedToDoDTO);
         }
 
         [HttpDelete("{id:int}")]
