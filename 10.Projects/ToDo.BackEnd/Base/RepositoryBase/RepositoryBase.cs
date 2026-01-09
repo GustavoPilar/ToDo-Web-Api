@@ -3,7 +3,7 @@ using System.Linq.Expressions;
 
 namespace ToDo.BackEnd
 {
-    public class RepositoryBase<T> : IRepositoryBase<T> where T : class
+    public class RepositoryBase<T> : IRepositoryBase<T> where T : class, IEntityBase
     {
 
         #region Fields
@@ -23,9 +23,9 @@ namespace ToDo.BackEnd
             return _context.Set<T>().AsNoTracking().ToList();
         }
 
-        public virtual T? GetById(int id)
+        public T? GetById(int id)
         {
-            return _context.Set<T>().FirstOrDefault(x => (int)(x.GetType().GetProperty("Id").GetValue(x)) == id);
+            return _context.Set<T>().FirstOrDefault(x => x.Id == id);
         }
 
         public IEnumerable<T> GetAllByProp(Expression<Func<T, bool>> predicate)

@@ -1,9 +1,7 @@
 ﻿namespace ToDo.BackEnd
 {
-    public class CategoryRepository : RepositoryBase<Category>, ICategoryRepository
+    public partial class CategoryRepository
     {
-        public CategoryRepository(ToDoContext context) : base(context)
-        {
-        }
+
     }
 }

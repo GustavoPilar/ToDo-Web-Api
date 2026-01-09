@@ -1,12 +1,9 @@
 ﻿using System.ComponentModel.DataAnnotations;
-using System.ComponentModel.DataAnnotations.Schema;
 
-namespace ToDo.BackEnd
+namespace ToDo.BackEnd.Base.EntityBase
 {
-    [Table("Severities")]
-    public class Severity
+    public class EntityBase<T> : IEntityBase where T : class
     {
-        #region Fields
         [Key]
         public int Id { get; set; }
 
@@ -15,8 +12,12 @@ namespace ToDo.BackEnd
         public string? Code { get; set; }
 
         [Required]
-        [StringLength(20, ErrorMessage = "Tamanho máximo de 20 caractéres")]
+        [StringLength(150, ErrorMessage = "Tamanho máximo de 150 caractéres")]
         public string? Description { get; set; }
-        #endregion
+
+        public string ToString()
+        {
+            return $"{typeof(T).Name}: {Code} - {Description}";
+        }
     }
 }

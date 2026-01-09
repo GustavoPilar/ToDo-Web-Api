@@ -1,9 +1,6 @@
 ﻿namespace ToDo.BackEnd
 {
-    public class SeverityRepository : RepositoryBase<Severity>, ISeverityRepository
+    public partial class SeverityRepository
     {
-        public SeverityRepository(ToDoContext context) : base(context)
-        {
-        }
     }
 }

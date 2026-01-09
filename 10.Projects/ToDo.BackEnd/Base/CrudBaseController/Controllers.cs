@@ -8,9 +8,27 @@ namespace ToDo.BackEnd
 
     [ApiController]
     [Route("[Controller]")]
-    public class CategoryController : CrudBaseController<Category, CategoryDTO>
+    public partial class CategoryController : CrudBaseController<Category, CategoryDTO>
     {
-        public CategoryController(IUnitOfWork unitOfWork) : base(unitOfWork)
+        public CategoryController(IUnitOfWork unitOfWork, IMapper mapper) : base(unitOfWork, mapper)
+        {
+        }
+    }
+
+    [ApiController]
+    [Route("[Controller]")]
+    public partial class SeverityController : CrudBaseController<Severity, SeverityDTO>
+    {
+        public SeverityController(IUnitOfWork unitOfWork, IMapper mapper) : base(unitOfWork, mapper)
+        {
+        }
+    }
+
+    [ApiController]
+    [Route("[Controller]")]
+    public partial class ToDoController : CrudBaseController<ToDo, ToDoDTO>
+    {
+        public ToDoController(IUnitOfWork unitOfWork, IMapper mapper) : base(unitOfWork, mapper)
         {
         }
     }
