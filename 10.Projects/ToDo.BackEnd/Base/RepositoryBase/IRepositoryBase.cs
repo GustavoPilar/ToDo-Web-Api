@@ -2,14 +2,23 @@
 
 namespace ToDo.BackEnd
 {
-    public interface IRepositoryBase<T>
+    public interface IRepositoryBase<T> where T : class, IEntityBase
     {
-        IEnumerable<T> GetAll();
+        #region Get
+        Pagination<T> GetAll(QueryStringPaginationParameter paginationParameter);
         T? GetById(int id);
-        IEnumerable<T> GetAllByProp(Expression<Func<T, bool>> predicate);
-        T? GetByProp(Expression<Func<T, bool>> predicate);
+        #endregion
+
+        #region Created
         T Create(T entity);
+        #endregion
+
+        #region Update
         T Update(T entity);
+        #endregion
+
+        #region Delete
         T Delete(T entity);
+        #endregion
     }
 }

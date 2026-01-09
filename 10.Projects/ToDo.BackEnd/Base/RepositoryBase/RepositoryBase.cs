@@ -17,10 +17,15 @@ namespace ToDo.BackEnd
         }
         #endregion
 
-        #region Members
-        public IEnumerable<T> GetAll()
+        #region Get
+        /// <summary>
+        /// Retorna todos os registros
+        /// </summary>
+        /// <returns>IEnumerable</returns>
+        public Pagination<T> GetAll(QueryStringPaginationParameter paginationParameter)
         {
-            return _context.Set<T>().AsNoTracking().ToList();
+            IQueryable<T> queryable = _context.Set<T>().AsNoTracking().AsQueryable<T>();
+            return Pagination<T>.ToPagedList(queryable, paginationParameter.PageNumber, paginationParameter.PageSize);
         }
 
         public T? GetById(int id)
@@ -28,30 +33,30 @@ namespace ToDo.BackEnd
             return _context.Set<T>().FirstOrDefault(x => x.Id == id);
         }
 
-        public IEnumerable<T> GetAllByProp(Expression<Func<T, bool>> predicate)
-        {
-            return _context.Set<T>().Where(predicate).AsNoTracking().ToList();
-        }
-        public T? GetByProp(Expression<Func<T, bool>> predicate)
-        {
-            return _context.Set<T>().FirstOrDefault(predicate);
-        }
+        #endregion
+
+        #region Create
         public T Create(T entity)
         {
             _context.Set<T>().Add(entity);
             return entity;
         }
+        #endregion
+
+        #region Update
         public T Update(T entity)
         {
             _context.Set<T>().Update(entity);
             return entity;
         }
+        #endregion
+
+        #region Delete
         public T Delete(T entity)
         {
             _context.Set<T>().Remove(entity);
             return entity;
         }
-
         #endregion
     }
 }

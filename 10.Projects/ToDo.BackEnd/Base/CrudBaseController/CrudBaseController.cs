@@ -1,5 +1,6 @@
 ﻿using AutoMapper;
 using Microsoft.AspNetCore.Mvc;
+using Newtonsoft.Json;
 using System.Reflection;
 
 namespace ToDo.BackEnd
@@ -23,14 +24,26 @@ namespace ToDo.BackEnd
 
         #region Actions
         [HttpGet]
-        public ActionResult<IEnumerable<TEntityDTO>> Get()
+        public ActionResult<IEnumerable<TEntityDTO>> Get([FromQuery] QueryStringPaginationParameter paginationParameter)
         {
-            List<TEntityDTO> entities = _mapper.Map<IEnumerable<TEntityDTO>>(_unitOfWork.Repository<TEntity>().GetAll()).ToList();
+            Pagination<TEntity> pagedList = _unitOfWork.Repository<TEntity>().GetAll(paginationParameter);
+            List<TEntityDTO> entities = _mapper.Map<IEnumerable<TEntityDTO>>(pagedList).ToList();
 
             if (entities is null)
             {
                 return NotFound("Nenhum entidade foi encontrada.");
             }
+
+            var metada = new
+            {
+                pagedList.TotalCount,
+                pagedList.PageSize,
+                pagedList.CurrentPage,
+                pagedList.HasNext,
+                pagedList.HasPrevious
+            };
+
+            Response.Headers.Add("X-Pagination", JsonConvert.SerializeObject(metada));
 
             return Ok(entities);
         }
