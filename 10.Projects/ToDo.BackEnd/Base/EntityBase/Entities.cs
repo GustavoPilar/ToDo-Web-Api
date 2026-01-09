@@ -1,4 +1,5 @@
-﻿using System.ComponentModel.DataAnnotations;
+﻿using Sieve.Attributes;
+using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 using System.Text.Json.Serialization;
 using ToDo.BackEnd.Base.EntityBase;
@@ -63,11 +64,14 @@ namespace ToDo.BackEnd
 
         #region Fields
         [Required]
+        [Sieve(CanFilter=true, CanSort=true)]
         public bool AlreadyDone { get; set; }
 
         [Required]
+        [Sieve(CanFilter = true, CanSort = true)]
         public DateTime StartDateTime { get; set; }
 
+        [Sieve(CanFilter = true, CanSort = true)]
         public DateTime? FinishDateTime { get; set; }
         #endregion
 
